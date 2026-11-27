@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "paper": {
+    "title": "高一物理第一学期期末试卷",
+    "subject": "物理",
+    "description": "本试卷共三大题，满分 100 分，考试时间 90 分钟。",
+    "durationMinutes": 90,
+    "settings": {
+      "durationMinutes": 90,
+      "shuffleQuestions": false,
+      "showAnalysis": true
+    }
+  },
+  "parts": [
+    {
+      "title": "一、单项选择题",
+      "instruction": "每题只有一个正确选项，每题 3 分。",
+      "questions": [
+        {
+          "type": "choice",
+          "choiceMode": "single",
+          "stem": "物体做匀速直线运动时，下列说法正确的是（　）",
+          "options": [
+            { "key": "A", "content": "速度随时间不断增大" },
+            { "key": "B", "content": "加速度为零" },
+            { "key": "C", "content": "位移逐渐减小" },
+            { "key": "D", "content": "所受合力不为零" }
+          ],
+          "answer": ["B"],
+          "analysis": "匀速直线运动速度恒定，加速度为零，所受合力为零。",
+          "score": 3
+        },
+        {
+          "type": "choice",
+          "choiceMode": "multiple",
+          "stem": "下列物理量中属于矢量的有（　）",
+          "options": [
+            { "key": "A", "content": "速度" },
+            { "key": "B", "content": "质量" },
+            { "key": "C", "content": "加速度" },
+            { "key": "D", "content": "时间" }
+          ],
+          "answer": ["A", "C"],
+          "analysis": "速度和加速度既有大小又有方向，是矢量；质量与时间为标量。",
+          "score": 4
+        }
+      ]
+    },
+    {
+      "title": "二、填空题与判断题",
+      "instruction": "请在横线处填写答案，判断题打“√”或“×”。",
+      "questions": [
+        {
+          "type": "blank",
+          "stem": "牛顿第一定律又称____定律，物体保持原有运动状态的性质叫____。",
+          "blankCount": 2,
+          "answer": ["惯性", "惯性"],
+          "analysis": "牛顿第一定律又称惯性定律，惯性是物体保持原有运动状态的性质。",
+          "score": 4
+        },
+        {
+          "type": "judge",
+          "stem": "物体的速度越大，惯性越大。",
+          "answer": false,
+          "analysis": "惯性只与质量有关，与速度无关。",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "title": "三、简答题与综合题",
+      "instruction": "写出必要的文字说明和解题过程。",
+      "questions": [
+        {
+          "type": "short_answer",
+          "stem": "简述牛顿第一定律的内容。",
+          "referenceAnswer": "一切物体总保持匀速直线运动状态或静止状态，直到有外力迫使它改变这种状态为止。",
+          "scoringPoints": ["指出物体保持原有运动状态", "指出力是改变运动状态的原因"],
+          "analysis": "",
+          "score": 10
+        },
+        {
+          "type": "comprehensive",
+          "stem": "阅读下列材料，回答问题。",
+          "material": "一辆汽车以 10 m/s 的速度在平直公路上匀速行驶，某时刻司机发现前方有障碍物后立即刹车，刹车过程可视为匀减速直线运动，加速度大小为 2 m/s²。",
+          "subQuestions": [
+            { "stem": "（1）求汽车刹车后 3 s 内的位移。", "answer": "21 m", "score": 5 },
+            { "stem": "（2）求汽车从刹车到停止所用的时间。", "answer": "5 s", "score": 5 }
+          ],
+          "referenceAnswer": "（1）21 m；（2）5 s。",
+          "scoringPoints": ["正确选择匀减速位移公式", "正确判断汽车停止时刻"],
+          "analysis": "",
+          "score": 10
+        }
+      ]
+    }
+  ]
+}

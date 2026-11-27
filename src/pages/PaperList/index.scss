@@ -1,0 +1,36 @@
+.paper-list-page {
+  min-height: 100vh;
+  padding: 28px 20px 48px;
+  background: #f5f7fb;
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  &__card {
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgb(15 23 42 / 6%);
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  &__score {
+    font-weight: 600;
+    color: #4f46e5;
+  }
+}

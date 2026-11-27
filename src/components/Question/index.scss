@@ -1,0 +1,282 @@
+.question {
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  background: #fff;
+
+  & + & {
+    margin-top: 12px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  &__index {
+    flex: none;
+    font-weight: 600;
+    color: #4f46e5;
+  }
+
+  &__stem {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #0f172a;
+    white-space: pre-wrap;
+  }
+
+  &__score {
+    flex: none;
+    margin-inline-end: 0;
+    color: #4f46e5;
+    background: #eef2ff;
+  }
+
+  &__meta {
+    margin: 8px 0 0 24px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  &__analysis {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #475569;
+    background: #f8fafc;
+  }
+
+  &__label {
+    flex: none;
+    font-weight: 600;
+    color: #4f46e5;
+  }
+
+  &__verdict {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #475569;
+  }
+
+  &__earned {
+    font-weight: 600;
+    color: #4f46e5;
+  }
+}
+
+.question-user-answer {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 0 24px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #334155;
+  background: #f1f5f9;
+
+  &__text {
+    flex: 1;
+    white-space: pre-wrap;
+  }
+}
+
+.question-blanks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0 24px;
+
+  &__input {
+    width: 180px;
+  }
+}
+
+.question-textarea {
+  margin: 8px 0 0 24px;
+  width: calc(100% - 24px);
+}
+
+.question-options {
+  margin: 10px 0 0 24px;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    display: flex;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    line-height: 1.6;
+
+    & + & {
+      margin-top: 2px;
+    }
+
+    &--correct {
+      color: #047857;
+      background: #ecfdf5;
+    }
+
+    &--selected {
+      border-color: #a5b4fc;
+      background: #eef2ff;
+    }
+
+    &--wrong {
+      color: #b91c1c;
+      background: #fef2f2;
+    }
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        background: #f8fafc;
+      }
+    }
+  }
+
+  &__key {
+    flex: none;
+    font-weight: 600;
+  }
+}
+
+.question-answer {
+  margin: 10px 0 0 24px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #047857;
+  background: #ecfdf5;
+
+  &__title {
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  &__text {
+    white-space: pre-wrap;
+  }
+}
+
+.question-points {
+  margin: 4px 0 0;
+  padding-left: 20px;
+
+  li + li {
+    margin-top: 2px;
+  }
+}
+
+.question-judge {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 0 24px;
+
+  &__item {
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #475569;
+    background: #f8fafc;
+    cursor: default;
+
+    &--correct {
+      border-color: #34d399;
+      color: #047857;
+      background: #ecfdf5;
+    }
+
+    &--selected {
+      border-color: #a5b4fc;
+      color: #4338ca;
+      background: #eef2ff;
+    }
+
+    &--wrong {
+      border-color: #fca5a5;
+      color: #b91c1c;
+      background: #fef2f2;
+    }
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        border-color: #a5b4fc;
+      }
+    }
+
+    &:disabled {
+      opacity: 1;
+    }
+  }
+}
+
+.question-material {
+  margin: 10px 0 0 24px;
+  padding: 12px 14px;
+  border-left: 3px solid #a5b4fc;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #475569;
+  background: #f8fafc;
+  white-space: pre-wrap;
+}
+
+.question-sub {
+  margin: 10px 0 0 24px;
+
+  &__item + &__item {
+    margin-top: 10px;
+  }
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #0f172a;
+  }
+
+  &__stem {
+    flex: 1;
+  }
+
+  &__score {
+    flex: none;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  &__answer {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #047857;
+  }
+
+  &__user {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #475569;
+    white-space: pre-wrap;
+  }
+}

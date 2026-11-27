@@ -1,0 +1,57 @@
+.wrong-questions-page {
+  min-height: 100vh;
+  padding: 28px 20px 48px;
+  background: #f5f7fb;
+
+  &__inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__item {
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgb(15 23 42 / 6%);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__paper {
+    color: rgb(0 0 0 / 45%);
+    font-size: 13px;
+  }
+
+  &__time {
+    margin-top: 10px;
+    color: rgb(0 0 0 / 45%);
+    font-size: 12px;
+  }
+
+  &__empty,
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 48px 0;
+    background: #fff;
+    border-radius: 16px;
+  }
+}

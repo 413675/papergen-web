@@ -1,0 +1,28 @@
+.generation-page {
+  min-height: 100vh;
+  padding: 32px 16px;
+  background: #f5f7fb;
+}
+
+.generation-page__inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.generation-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.generation-card {
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.generation-tip {
+  margin-top: 16px;
+}
