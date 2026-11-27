@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import HomePage from '@/pages/HomePage'
+import AiChatPage from '@/pages/AiChat'
 import GenerationTasksPage from '@/pages/GenerationTasks'
 import LoginPage from '@/pages/LoginPage'
 import PaperDetailPage from '@/pages/PaperDetail'
@@ -46,6 +47,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai"
+          element={
+            <ProtectedRoute>
+              <AiChatPage />
             </ProtectedRoute>
           }
         />

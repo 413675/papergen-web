@@ -18,7 +18,7 @@ export default function AuthLayout({ title, subtitle, children, footer }: AuthLa
       <div className="auth-decor auth-decor--two" />
       <div className="auth-card">
         <div className="auth-brand">
-          <div className="auth-logo">卷</div>
+          <img className="auth-logo" src="/paper-logo.svg" alt="试卷助手" />
           <div>
             <h1>试卷助手</h1>
             <p>PaperGen · 智能组卷与试卷生成</p>

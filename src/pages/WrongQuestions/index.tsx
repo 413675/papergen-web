@@ -58,6 +58,8 @@ export default function WrongQuestionsPage() {
   const [reassembleOpen, setReassembleOpen] = useState(false)
   const [reassembling, setReassembling] = useState(false)
   const [form] = Form.useForm<PaperReassembleParam>()
+  const [subjectFilter, setSubjectFilter] = useState<string>()
+  const [paperFilter, setPaperFilter] = useState<number>()
 
   // 按科目聚合，重组试卷只允许使用同一科目
   const subjectOptions = useMemo(() => {
@@ -76,6 +78,35 @@ export default function WrongQuestionsPage() {
         count,
       }))
   }, [items])
+
+  // 按来源试卷聚合，用于筛选
+  const paperOptions = useMemo(() => {
+    const counter = new Map<number, { title: string; count: number }>()
+    items.forEach((item) => {
+      if (item.paperId && item.paperTitle) {
+        const current = counter.get(item.paperId)
+        counter.set(item.paperId, { title: item.paperTitle, count: (current?.count ?? 0) + 1 })
+      }
+    })
+    return Array.from(counter.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([paperId, { title, count }]) => ({
+        value: paperId,
+        label: `${title}（${count} 道）`,
+      }))
+  }, [items])
+
+  const hasFilter = Boolean(subjectFilter || paperFilter)
+
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          (!subjectFilter || item.subject === subjectFilter) &&
+          (!paperFilter || item.paperId === paperFilter),
+      ),
+    [items, subjectFilter, paperFilter],
+  )
 
   const load = async () => {
     setLoading(true)
@@ -122,6 +153,22 @@ export default function WrongQuestionsPage() {
       }
       return next
     })
+  }
+
+  const handleSubjectFilterChange = (value?: string) => {
+    setSubjectFilter(value)
+    setSelectedIds(new Set())
+  }
+
+  const handlePaperFilterChange = (value?: number) => {
+    setPaperFilter(value)
+    setSelectedIds(new Set())
+  }
+
+  const clearFilters = () => {
+    setSubjectFilter(undefined)
+    setPaperFilter(undefined)
+    setSelectedIds(new Set())
   }
 
   const handleDelete = async (item: WrongQuestionItem) => {
@@ -222,7 +269,9 @@ export default function WrongQuestionsPage() {
                 错题本
               </Typography.Title>
               <Typography.Text type="secondary">
-                共 {items.length} 道错题，按最近错误时间排序，可展开查看答案与解析
+                共 {items.length} 道错题
+                {hasFilter ? `，当前筛选出 ${filteredItems.length} 道` : ''}
+                ，按最近错误时间排序，可展开查看答案与解析
               </Typography.Text>
             </div>
           </Space>
@@ -253,6 +302,39 @@ export default function WrongQuestionsPage() {
           </Space>
         </div>
 
+        {!loading && items.length > 0 && (
+          <div className="wrong-questions-page__filters">
+            <Space size={8} wrap>
+              <Select
+                allowClear
+                placeholder="全部科目"
+                style={{ width: 180 }}
+                value={subjectFilter}
+                options={subjectOptions.map(({ value, label }) => ({ value, label }))}
+                onChange={handleSubjectFilterChange}
+              />
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                placeholder="全部试卷"
+                style={{ width: 260 }}
+                value={paperFilter}
+                options={paperOptions}
+                onChange={handlePaperFilterChange}
+              />
+              {hasFilter && (
+                <Button type="link" onClick={clearFilters}>
+                  清除筛选
+                </Button>
+              )}
+            </Space>
+            <Typography.Text type="secondary">
+              {hasFilter ? `筛选出 ${filteredItems.length} 道` : `共 ${items.length} 道`}
+            </Typography.Text>
+          </div>
+        )}
+
         {loading ? (
           <div className="wrong-questions-page__loading">
             <Spin size="large" tip="正在加载错题..." />
@@ -261,9 +343,15 @@ export default function WrongQuestionsPage() {
           <Card variant="borderless" className="wrong-questions-page__empty">
             <Empty description="还没有错题，交卷后答错的客观题会自动收录到这里" />
           </Card>
+        ) : filteredItems.length === 0 ? (
+          <Card variant="borderless" className="wrong-questions-page__empty">
+            <Empty description="当前筛选条件下没有错题">
+              <Button onClick={clearFilters}>清除筛选</Button>
+            </Empty>
+          </Card>
         ) : (
           <div className="wrong-questions-page__list">
-            {items.map((item, index) => {
+            {filteredItems.map((item, index) => {
               const showAnswer = expanded.has(item.wrongQuestionId)
               return (
                 <Card
@@ -340,7 +428,7 @@ export default function WrongQuestionsPage() {
         ]}
       >
         <Typography.Paragraph type="secondary">
-          只会使用所选科目下的错题，按最近错误时间从新到旧选题。
+          只会使用所选科目下的错题，随机抽取题目组成试卷。
         </Typography.Paragraph>
         <Form form={form} layout="vertical">
           <Form.Item

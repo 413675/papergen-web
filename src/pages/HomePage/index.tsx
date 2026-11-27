@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { App as AntdApp, Avatar, Button, Card, Col, Layout, Row, Space, Tag, Typography } from 'antd'
+import { App as AntdApp, Button, Card, Col, Layout, Row, Space, Tag, Typography } from 'antd'
 import {
   FileTextOutlined,
   LogoutOutlined,
+  RobotOutlined,
   ThunderboltOutlined,
   WarningOutlined,
 } from '@ant-design/icons'
@@ -20,7 +21,8 @@ interface ModuleItem {
 }
 
 const MODULES: ModuleItem[] = [
-  { icon: <ThunderboltOutlined />, title: '生成任务', desc: '导入文件，自动生成试卷', path: '/generation/tasks' },
+  { icon: <RobotOutlined />, title: 'AI 导卷', desc: '上传任意文件，AI 生成可答题试卷', path: '/ai' },
+  { icon: <ThunderboltOutlined />, title: '生成任务', desc: '导入 JSON，自动生成试卷', path: '/generation/tasks' },
   { icon: <FileTextOutlined />, title: '试卷管理', desc: '继续答题、查看解析与错题', path: '/papers' },
   { icon: <WarningOutlined />, title: '错题本', desc: '按知识点回顾错题', path: '/wrong-questions' },
 ]
@@ -62,14 +64,11 @@ export default function HomePage() {
     <Layout className="home-layout">
       <Layout.Header className="home-header">
         <div className="home-brand">
-          <span className="home-brand__logo">卷</span>
+          <img className="home-brand__logo" src="/paper-logo.svg" alt="试卷助手" />
           <span>试卷助手</span>
         </div>
         <Space size={16}>
           <Space size={8} className="home-user">
-            <Avatar size="small" style={{ backgroundColor: '#4f46e5' }}>
-              {displayName.slice(0, 1) || '?'}
-            </Avatar>
             <span>{displayName || '加载中...'}</span>
             {user && <Tag color="blue">{ROLE_LABELS[user.role] ?? user.role}</Tag>}
           </Space>
