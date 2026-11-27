@@ -7,20 +7,12 @@ export interface AiChatResult {
   totalScore?: number
 }
 
-/** 用户级 AI 模型配置（不返回真实密钥） */
-export interface AiModelConfig {
+/** AI 模型配置，只保存在前端内存，不落库也不持久化 */
+export interface AiChatConfig {
   baseUrl: string
   model: string
   temperature: number
-  hasApiKey: boolean
-}
-
-/** 保存模型配置的入参，apiKey 留空表示沿用旧密钥 */
-export interface AiModelConfigParam {
-  baseUrl: string
-  model: string
-  temperature: number
-  apiKey?: string
+  apiKey: string
 }
 
 /** AI 对话消息 */

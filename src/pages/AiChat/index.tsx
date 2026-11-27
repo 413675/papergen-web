@@ -11,8 +11,8 @@ import {
   SettingOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { chatWithAi, clearAiMessages, fetchAiConfig, fetchAiMessages, saveAiConfig } from '@/api/ai'
-import type { AiChatMessage } from '@/types/ai'
+import { chatWithAi, clearAiMessages, fetchAiMessages } from '@/api/ai'
+import type { AiChatConfig, AiChatMessage } from '@/types/ai'
 import './index.scss'
 
 /** 页面内展示的消息，id 为本地序号 */
@@ -29,7 +29,7 @@ interface ModelConfigForm {
   baseUrl: string
   model: string
   temperature: number
-  apiKey?: string
+  apiKey: string
 }
 
 const ACCEPT_TYPES =
@@ -62,9 +62,8 @@ export default function AiChatPage() {
   const [file, setFile] = useState<File | null>(null)
   const [sessionId] = useState(createSessionId)
   const [configForm] = Form.useForm<ModelConfigForm>()
-  const [hasApiKey, setHasApiKey] = useState<boolean | null>(null)
+  const [chatConfig, setChatConfig] = useState<AiChatConfig | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
-  const [savingConfig, setSavingConfig] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -75,14 +74,6 @@ export default function AiChatPage() {
       })
       .finally(() => setLoadingHistory(false))
   }, [sessionId])
-
-  useEffect(() => {
-    fetchAiConfig()
-      .then((config) => setHasApiKey(config.hasApiKey))
-      .catch(() => {
-        // 未登录时由请求拦截器处理
-      })
-  }, [])
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
@@ -98,42 +89,38 @@ export default function AiChatPage() {
     })
   }
 
-  const openConfig = async () => {
+  const openConfig = () => {
     configForm.resetFields()
-    try {
-      const config = await fetchAiConfig()
-      setHasApiKey(config.hasApiKey)
-      configForm.setFieldsValue({
-        baseUrl: config.baseUrl,
-        model: config.model,
-        temperature: config.temperature,
-        apiKey: '',
-      })
-    } catch {
-      // 使用表单默认值
-    }
+    configForm.setFieldsValue({
+      baseUrl: chatConfig?.baseUrl ?? 'https://api.deepseek.com',
+      model: chatConfig?.model ?? 'deepseek-chat',
+      temperature: chatConfig?.temperature ?? 0.2,
+      apiKey: chatConfig?.apiKey ?? '',
+    })
     setConfigOpen(true)
   }
 
   const handleSaveConfig = async () => {
     try {
       const values = await configForm.validateFields()
-      setSavingConfig(true)
-      const saved = await saveAiConfig({
+      const nextApiKey = values.apiKey.trim()
+      if (!nextApiKey) {
+        toast.warning('请填写 API Key')
+        return
+      }
+      // 配置只保留在页面内存中，刷新后需要重新填写
+      setChatConfig({
         baseUrl: values.baseUrl,
         model: values.model,
         temperature: values.temperature,
-        apiKey: values.apiKey?.trim() || undefined,
+        apiKey: nextApiKey,
       })
-      setHasApiKey(saved.hasApiKey)
       setConfigOpen(false)
-      toast.success('模型配置已保存')
+      toast.success('模型配置已生效，刷新页面后需重新填写')
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message)
       }
-    } finally {
-      setSavingConfig(false)
     }
   }
 
@@ -142,8 +129,8 @@ export default function AiChatPage() {
     if (sending || (!text && !file)) {
       return
     }
-    if (hasApiKey === false) {
-      toast.warning('请先配置 AI 模型的 API Key')
+    if (!chatConfig?.apiKey) {
+      toast.warning('请先配置 AI 模型')
       openConfig()
       return
     }
@@ -156,7 +143,7 @@ export default function AiChatPage() {
     setInput('')
     setFile(null)
     try {
-      const result = await chatWithAi(sessionId, text, currentFile)
+      const result = await chatWithAi(sessionId, text, chatConfig, currentFile)
       setItems((prev) => [
         ...prev,
         { id: ++localId, role: 'assistant', content: result.reply, paperId: result.paperId },
@@ -318,12 +305,11 @@ export default function AiChatPage() {
         open={configOpen}
         onOk={handleSaveConfig}
         onCancel={() => setConfigOpen(false)}
-        confirmLoading={savingConfig}
         okText="保存"
         cancelText="取消"
       >
         <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
-          支持任何兼容 OpenAI 协议的模型服务，配置只保存在你的账号下。
+          支持任何兼容 OpenAI 协议的服务。配置只保存在当前页面内存中，刷新后需要重新填写，不会上传到服务器存储。
         </Typography.Paragraph>
         <Form
           form={configForm}
@@ -333,8 +319,8 @@ export default function AiChatPage() {
           <Form.Item
             name="apiKey"
             label="API Key"
-            rules={hasApiKey ? [] : [{ required: true, message: '请填写 API Key' }]}
-            extra={hasApiKey ? '已保存密钥，留空表示不修改' : undefined}
+            rules={[{ required: true, message: '请填写 API Key' }]}
+            extra="只保存在当前页面，刷新后需重新填写"
           >
             <Input.Password placeholder="sk-..." autoComplete="new-password" />
           </Form.Item>

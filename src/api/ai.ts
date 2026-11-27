@@ -1,10 +1,14 @@
 import { request } from './http'
-import type { AiChatMessage, AiChatResult, AiModelConfig, AiModelConfigParam } from '@/types/ai'
+import type { AiChatConfig, AiChatMessage, AiChatResult } from '@/types/ai'
 
-/** 携带文件与 AI 对话生成试卷，模型处理较慢，单独放宽超时 */
-export function chatWithAi(sessionId: string, message: string, file: File | null) {
+/** 携带文件与 AI 对话生成试卷，模型处理较慢，单独放宽超时；模型配置随请求传入，服务端不保存 */
+export function chatWithAi(sessionId: string, message: string, config: AiChatConfig, file: File | null) {
   const data = new FormData()
   data.append('sessionId', sessionId)
+  data.append('apiKey', config.apiKey.trim())
+  data.append('baseUrl', config.baseUrl.trim())
+  data.append('model', config.model.trim())
+  data.append('temperature', String(config.temperature))
   if (message.trim()) {
     data.append('message', message.trim())
   }
@@ -27,14 +31,4 @@ export function fetchAiMessages(sessionId: string) {
 /** 清空指定会话的记忆 */
 export function clearAiMessages(sessionId: string) {
   return request<void>({ url: '/v1/ai/messages', method: 'DELETE', params: { sessionId } })
-}
-
-/** 读取当前用户的模型配置 */
-export function fetchAiConfig() {
-  return request<AiModelConfig>({ url: '/v1/ai/config', method: 'GET' })
-}
-
-/** 保存当前用户的模型配置，apiKey 留空表示不修改 */
-export function saveAiConfig(data: AiModelConfigParam) {
-  return request<AiModelConfig>({ url: '/v1/ai/config', method: 'PUT', data })
 }
