@@ -114,4 +114,20 @@
   &__start {
     margin-top: 10px;
   }
+
+  &__hint {
+    animation: ai-hint-fade 0.35s ease;
+  }
+}
+
+@keyframes ai-hint-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

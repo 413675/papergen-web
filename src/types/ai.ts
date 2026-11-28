@@ -7,14 +7,6 @@ export interface AiChatResult {
   totalScore?: number
 }
 
-/** AI 模型配置，只保存在前端内存，不落库也不持久化 */
-export interface AiChatConfig {
-  baseUrl: string
-  model: string
-  temperature: number
-  apiKey: string
-}
-
 /** AI 对话消息 */
 export interface AiChatMessage {
   aiChatMessageId: number
@@ -23,4 +15,12 @@ export interface AiChatMessage {
   attachmentName?: string
   paperId?: number
   createTime?: string
+}
+
+/** AI 请求进度 */
+export interface AiProgress {
+  status: 'IDLE' | 'GENERATING' | 'RETRYING'
+  retry: number
+  maxRetries: number
+  waitSeconds: number
 }

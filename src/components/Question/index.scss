@@ -114,23 +114,25 @@
 
   &__item {
     display: flex;
+    align-items: center;
     gap: 10px;
     padding: 6px 10px;
+    border: 1px solid transparent;
     border-radius: 8px;
     line-height: 1.6;
+    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 
     & + & {
-      margin-top: 2px;
+      margin-top: 4px;
+    }
+
+    &--selected {
+      background: #eef2ff;
     }
 
     &--correct {
       color: #047857;
       background: #ecfdf5;
-    }
-
-    &--selected {
-      border-color: #a5b4fc;
-      background: #eef2ff;
     }
 
     &--wrong {
@@ -140,16 +142,46 @@
 
     &--clickable {
       cursor: pointer;
+      background: #fff;
+      border-color: #eef0f5;
 
       &:hover {
-        background: #f8fafc;
+        background: #f7f8ff;
+        border-color: #dbe1ff;
+      }
+
+      // 作答模式下用品牌色描边和实心选项标识，和悬停区分开
+      &.question-options__item--selected {
+        background: #eef2ff;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 10%);
+
+        .question-options__key {
+          color: #fff;
+          background: #4f46e5;
+        }
+
+        .question-options__content {
+          font-weight: 600;
+          color: #312e81;
+        }
       }
     }
   }
 
   &__key {
     flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 13px;
     font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    transition: background 0.18s ease, color 0.18s ease;
   }
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { App as AntdApp, Button, Empty, Form, Input, InputNumber, Modal, Popconfirm, Space, Spin, Tag, Typography, Upload } from 'antd'
+import { App as AntdApp, Button, Empty, Input, Popconfirm, Space, Spin, Tag, Typography, Upload } from 'antd'
 import {
   ArrowLeftOutlined,
   CloseOutlined,
@@ -8,11 +8,10 @@ import {
   PaperClipOutlined,
   RobotOutlined,
   SendOutlined,
-  SettingOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { chatWithAi, clearAiMessages, fetchAiMessages } from '@/api/ai'
-import type { AiChatConfig, AiChatMessage } from '@/types/ai'
+import { chatWithAi, clearAiMessages, fetchAiMessages, fetchAiProgress } from '@/api/ai'
+import type { AiChatMessage, AiProgress } from '@/types/ai'
 import './index.scss'
 
 /** 页面内展示的消息，id 为本地序号 */
@@ -24,16 +23,18 @@ interface ChatItem {
   paperId?: number
 }
 
-/** 模型配置表单 */
-interface ModelConfigForm {
-  baseUrl: string
-  model: string
-  temperature: number
-  apiKey: string
-}
-
 const ACCEPT_TYPES =
   '.pdf,.doc,.docx,.txt,.md,.json,.csv,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.html,.xml'
+
+/** 生成期间轮播的等待提示 */
+const AI_WAIT_HINTS = [
+  '正在读取你上传的文件…',
+  '正在识别题型、题量和分值…',
+  '正在随机抽题并打乱顺序…',
+  '正在生成试卷 JSON…',
+  '正在自检格式，有问题会自动重新生成…',
+  '长试卷可能需要几分钟，请不要关闭页面…',
+]
 
 let localId = 0
 
@@ -61,9 +62,8 @@ export default function AiChatPage() {
   const [input, setInput] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [sessionId] = useState(createSessionId)
-  const [configForm] = Form.useForm<ModelConfigForm>()
-  const [chatConfig, setChatConfig] = useState<AiChatConfig | null>(null)
-  const [configOpen, setConfigOpen] = useState(false)
+  const [progress, setProgress] = useState<AiProgress | null>(null)
+  const [hintIndex, setHintIndex] = useState(0)
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -79,6 +79,45 @@ export default function AiChatPage() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
   }, [items, sending])
 
+  // 请求进行中轮询后端进度，展示模型繁忙时的自动重试次数
+  useEffect(() => {
+    if (!sending) {
+      return
+    }
+    let stopped = false
+    const timer = window.setInterval(() => {
+      fetchAiProgress(sessionId)
+        .then((next) => {
+          if (!stopped) {
+            setProgress(next)
+          }
+        })
+        .catch(() => {
+          // 进度查询失败不影响主流程
+        })
+    }, 1000)
+    return () => {
+      stopped = true
+      window.clearInterval(timer)
+    }
+  }, [sending, sessionId])
+
+  // 生成期间轮播等待提示，避免长时间只有一个转圈
+  useEffect(() => {
+    if (!sending) {
+      return
+    }
+    const timer = window.setInterval(() => {
+      setHintIndex((prev) => (prev + 1) % AI_WAIT_HINTS.length)
+    }, 4000)
+    return () => window.clearInterval(timer)
+  }, [sending])
+
+  const sendingHint =
+    progress?.status === 'RETRYING'
+      ? `模型访问量过大，正在自动重试（第 ${progress.retry}/${progress.maxRetries} 次），请稍候…`
+      : AI_WAIT_HINTS[hintIndex]
+
   const askStart = (paperId: number, title?: string, questionCount?: number, totalScore?: number) => {
     modal.confirm({
       title: '试卷已生成',
@@ -89,52 +128,13 @@ export default function AiChatPage() {
     })
   }
 
-  const openConfig = () => {
-    configForm.resetFields()
-    configForm.setFieldsValue({
-      baseUrl: chatConfig?.baseUrl ?? 'https://api.deepseek.com',
-      model: chatConfig?.model ?? 'deepseek-chat',
-      temperature: chatConfig?.temperature ?? 0.2,
-      apiKey: chatConfig?.apiKey ?? '',
-    })
-    setConfigOpen(true)
-  }
-
-  const handleSaveConfig = async () => {
-    try {
-      const values = await configForm.validateFields()
-      const nextApiKey = values.apiKey.trim()
-      if (!nextApiKey) {
-        toast.warning('请填写 API Key')
-        return
-      }
-      // 配置只保留在页面内存中，刷新后需要重新填写
-      setChatConfig({
-        baseUrl: values.baseUrl,
-        model: values.model,
-        temperature: values.temperature,
-        apiKey: nextApiKey,
-      })
-      setConfigOpen(false)
-      toast.success('模型配置已生效，刷新页面后需重新填写')
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
-    }
-  }
-
   const handleSend = async () => {
     const text = input.trim()
     if (sending || (!text && !file)) {
       return
     }
-    if (!chatConfig?.apiKey) {
-      toast.warning('请先配置 AI 模型')
-      openConfig()
-      return
-    }
     const currentFile = file
+    setHintIndex(0)
     setSending(true)
     setItems((prev) => [
       ...prev,
@@ -143,7 +143,7 @@ export default function AiChatPage() {
     setInput('')
     setFile(null)
     try {
-      const result = await chatWithAi(sessionId, text, chatConfig, currentFile)
+      const result = await chatWithAi(sessionId, text, currentFile)
       setItems((prev) => [
         ...prev,
         { id: ++localId, role: 'assistant', content: result.reply, paperId: result.paperId },
@@ -157,6 +157,7 @@ export default function AiChatPage() {
       toast.error(reason)
     } finally {
       setSending(false)
+      setProgress(null)
     }
   }
 
@@ -186,9 +187,6 @@ export default function AiChatPage() {
             </Space>
           </Space>
           <Space size={8}>
-            <Button icon={<SettingOutlined />} onClick={openConfig}>
-              模型配置
-            </Button>
             <Popconfirm title="清空后会忘记之前的文件与需求，确定吗？" onConfirm={handleClear}>
               <Button icon={<DeleteOutlined />}>清空记忆</Button>
             </Popconfirm>
@@ -242,7 +240,9 @@ export default function AiChatPage() {
             <div className="ai-message ai-message--assistant">
               <div className="ai-message__bubble ai-message__bubble--loading">
                 <Spin size="small" />
-                <span>AI 正在解析文件并生成试卷，这可能需要一点时间…</span>
+                <span key={progress?.status === 'RETRYING' ? 'retry' : hintIndex} className="ai-message__hint">
+                  {sendingHint}
+                </span>
               </div>
             </div>
           )}
@@ -299,46 +299,6 @@ export default function AiChatPage() {
           </div>
         </div>
       </div>
-
-      <Modal
-        title="AI 模型配置"
-        open={configOpen}
-        onOk={handleSaveConfig}
-        onCancel={() => setConfigOpen(false)}
-        okText="保存"
-        cancelText="取消"
-      >
-        <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
-          支持任何兼容 OpenAI 协议的服务。配置只保存在当前页面内存中，刷新后需要重新填写，不会上传到服务器存储。
-        </Typography.Paragraph>
-        <Form
-          form={configForm}
-          layout="vertical"
-          initialValues={{ baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat', temperature: 0.2 }}
-        >
-          <Form.Item
-            name="apiKey"
-            label="API Key"
-            rules={[{ required: true, message: '请填写 API Key' }]}
-            extra="只保存在当前页面，刷新后需重新填写"
-          >
-            <Input.Password placeholder="sk-..." autoComplete="new-password" />
-          </Form.Item>
-          <Form.Item
-            name="baseUrl"
-            label="服务地址"
-            rules={[{ required: true, message: '请填写服务地址' }]}
-          >
-            <Input placeholder="https://api.deepseek.com" />
-          </Form.Item>
-          <Form.Item name="model" label="模型名称" rules={[{ required: true, message: '请填写模型名称' }]}>
-            <Input placeholder="deepseek-chat" />
-          </Form.Item>
-          <Form.Item name="temperature" label="温度（0-2）">
-            <InputNumber min={0} max={2} step={0.1} style={{ width: '100%' }} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   )
 }
