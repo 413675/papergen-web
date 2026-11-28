@@ -7,7 +7,7 @@ import { tokenStorage } from '@/utils/token'
  */
 const http = axios.create({
   baseURL: '/api',
-  timeout: 15000,
+  timeout: 60000,
 })
 
 http.interceptors.request.use((config) => {
